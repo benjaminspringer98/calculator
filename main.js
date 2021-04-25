@@ -26,7 +26,7 @@ negativeButton.addEventListener("click", makeNegative);
 
 
 function appendNumber() { 
-    if(display.textContent === "" || display.textContent === "-" && this.value === "0") { // don't allow 0 as first number
+    if((display.textContent === "" || display.textContent === "-") && this.value === "0") { // don't allow 0 as first number
         return;
     }
     if(display.textContent.length > 11) { // don't allow too large inputs
