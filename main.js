@@ -26,8 +26,15 @@ negativeButton.addEventListener("click", makeNegative);
 
 
 function appendNumber() { 
-    if((display.textContent === "" || display.textContent === "-") && this.value === "0") { // don't allow 0 as first number
+    /*if((display.textContent === "" || display.textContent === "-") && this.value === "0") { // don't allow 0 as first number
         return;
+    }*/
+    if(display.textContent === "0" && this.value === "0") { // don't allow more than one 0 if there's nothing else on the screen
+        return;
+    }
+    if(display.textContent === "0" && this.value !== "0") { // if 0 is the only number on the screen and user inputs a number different from 0, replace 0 with input number
+        display.textContent = this.value;
+        return;     
     }
     if(display.textContent.length > 11) { // don't allow too large inputs
         return;
@@ -36,7 +43,7 @@ function appendNumber() {
 }
 
 function setOperation() {
-    firstNumber = display.textContent // save currently displayed number
+    firstNumber = display.textContent // save currently displayed number as first number for the calculation
     currentOperation = this.id; // save operation that was clicked
     clearDisplay();
 }
@@ -65,6 +72,9 @@ function appendDecimalPoint() {
 }
 
 function makeNegative() {
+    if(display.textContent === "") { // don't allow - as first input
+        return;
+    }
     if(display.textContent[0] === "-") { // reverse negation, if currently displayed number is already negative
         display.textContent = display.textContent.replace(display.textContent[0], "");
         return;
@@ -73,19 +83,29 @@ function makeNegative() {
 }
 
 function check() {
-    secondNumber = display.textContent;
+    secondNumber = display.textContent; // save currently displayed number as second number for the calculation
 
-    if(currentOperation === null) {
+    if(currentOperation === null) { 
         return;
     }
     if (currentOperation === "divide" && secondNumber === "0") {
         display.textContent = "Err: divide by 0";
         return;
     }
-    display.textContent = operate(currentOperation, Number(firstNumber), Number(secondNumber));
+
+    result = operate(currentOperation, Number(firstNumber), Number(secondNumber));
+    // we have 3 possibilities here:
+    if(result.toString().length > 12 && result > 999999999999) { // 1: result is too large for the display AND bigger than 999 999 999 999
+        display.textContent = result.toExponential(6); // we then want to return scientific notation
+    } 
+    else if(result.toString().length > 12) { // 2: result is too large for the display but not bigger than 999 999 999 999 
+        display.textContent = result.toFixed(10); // we then round it to 10 decimal places to fit in the display
+    }
+    else {
+        display.textContent = result; // 3: none of the above, so we just display the result
+    } 
     currentOperation = null;
 }
-
 
 function operate(operator, a, b) {
     switch(operator) {
@@ -101,6 +121,7 @@ function operate(operator, a, b) {
 }
 
 // mathematical operations:
+
 add = (a, b) => a + b;
 
 subtract = (a, b) => a - b;
